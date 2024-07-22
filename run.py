@@ -44,6 +44,13 @@ def setup_logger(folder_path):
 def driver_config(args):
     options = webdriver.ChromeOptions()
 
+    extensions_dir = "chromeExtensions"
+
+    for filename in os.listdir(extensions_dir):
+        if filename.endswith(".crx"):
+            path_to_extension = os.path.join(extensions_dir, filename)
+            options.add_extension(path_to_extension)
+
     if args.save_accessibility_tree:
         args.force_device_scale = True
 
