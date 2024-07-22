@@ -1,0 +1,11 @@
+{
+  "search.useIgnoreFiles": true,
+  "files.exclude": {
+    "**/*.js": true
+  },
+  "search.exclude": {
+    "**/*.js": true
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "ms-python.black-formatter"
+}
