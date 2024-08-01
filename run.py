@@ -194,8 +194,8 @@ def call_gpt4v_api(args, openai_client: OpenAI, messages):
 
 def exec_action_click(info, web_ele, driver_task):
     driver_task.execute_script("arguments[0].setAttribute('target', '_self')", web_ele)
-    web_ele.click()
-    time.sleep(3)
+    driver_task.execute_script("arguments[0].click();", web_ele)
+    time.sleep(5)
 
 
 def exec_action_type(info, web_ele, driver_task):
@@ -214,18 +214,11 @@ def exec_action_type(info, web_ele, driver_task):
         # Not always work to delete
         web_ele.clear()
         # Another way to delete
-        if platform.system() == "Darwin":
-            web_ele.send_keys(Keys.COMMAND + "a")
-        else:
-            web_ele.send_keys(Keys.CONTROL + "a")
+        web_ele.send_keys(Keys.CONTROL + "a")
         web_ele.send_keys(" ")
         web_ele.send_keys(Keys.BACKSPACE)
     except:
         pass
-
-    actions = ActionChains(driver_task)
-    actions.click(web_ele).perform()
-    actions.pause(1)
 
     try:
         driver_task.execute_script(
@@ -234,11 +227,10 @@ def exec_action_type(info, web_ele, driver_task):
     except:
         pass
 
-    actions.send_keys(type_content)
-    actions.pause(2)
+    web_ele.send_keys(type_content)
+    time.sleep(2)
 
-    actions.send_keys(Keys.ENTER)
-    actions.perform()
+    web_ele.send_keys(Keys.ENTER)
     time.sleep(10)
     return warn_obs
 
@@ -376,11 +368,7 @@ def main():
 
         driver_task.switch_to.window(driver_task.window_handles[0])
         driver_task.get(task["web"])
-        try:
-            driver_task.find_element(By.TAG_NAME, "body").click()
-        except:
-            pass
-        # sometimes enter SPACE, the page will sroll down
+        zoomPercentage = 75
         driver_task.execute_script(
             """window.onkeydown = function(e) {if(e.keyCode == 32 && e.target.type != 'text' && e.target.type != 'textarea') {e.preventDefault();}};"""
         )
@@ -417,10 +405,15 @@ def main():
             logging.info(f"Iter: {it}")
             it += 1
             if not fail_obs:
+                driver_task.execute_script(
+                    f"document.body.style.zoom='{zoomPercentage}%'"
+                )
                 try:
                     if not args.text_only:
                         rects, web_eles, web_eles_text = get_web_element_rect(
-                            driver_task, fix_color=args.fix_box_color
+                            driver_task,
+                            fix_color=args.fix_box_color,
+                            zoom=zoomPercentage / 100,
                         )
                     else:
                         accessibility_tree_path = os.path.join(
