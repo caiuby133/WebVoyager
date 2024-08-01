@@ -137,7 +137,7 @@ def format_msg_text_only(it, init_msg, pdf_obs, warn_obs, ac_tree):
         return curr_msg
 
 
-def call_gpt4v_api(args, openai_client, messages):
+def call_gpt4v_api(args, openai_client: OpenAI, messages):
     retry_times = 0
     while True:
         try:
@@ -350,6 +350,31 @@ def main():
         driver_task.set_window_size(
             args.window_width, args.window_height
         )  # larger height may contain more web information
+
+        time.sleep(5)
+        for handle in driver_task.window_handles:
+            driver_task.switch_to.window(handle)
+            if driver_task.title == "Poperblocker":
+                agree_button = driver_task.find_element(
+                    By.XPATH, "//button[contains(@class, 'OptInActionAgree')]"
+                )
+                agree_button.click()
+
+                free_plan_button = driver_task.find_element(
+                    By.XPATH,
+                    "//button[contains(@class, 'SkipBtn') and contains(text(), 'Continue with free plan')]",
+                )
+                free_plan_button.click()
+                driver_task.close()
+            elif "adblockultimate.net" in driver_task.current_url:
+                time.sleep(1)
+                driver_task.find_element(
+                    By.XPATH,
+                    "//div[contains(text(), 'Got it!')]",
+                ).click()
+                driver_task.close()
+
+        driver_task.switch_to.window(driver_task.window_handles[0])
         driver_task.get(task["web"])
         try:
             driver_task.find_element(By.TAG_NAME, "body").click()
